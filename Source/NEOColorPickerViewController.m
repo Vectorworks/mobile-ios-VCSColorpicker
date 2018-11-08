@@ -1,27 +1,3 @@
-//
-//  NEOColorPickerViewController.m
-//
-//  Created by Karthik Abram on 10/23/12.
-//  Copyright (c) 2012 Neovera Inc.
-//
-
-/*
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- 
- */
-
-
 #import "NEOColorPickerViewController.h"
 #import "NEOColorPickerHSLViewController.h"
 #import "NEOColorPickerHueGridViewController.h"
@@ -36,6 +12,10 @@
 
 @property (nonatomic, weak) CALayer *selectedColorLayer;
 @property (nonatomic, strong) UIColor* savedColor;
+@property (nonatomic, strong) NSMutableArray* colorLayers;
+@property (nonatomic, assign) CGRect selectedColorLabelBaseFrame;
+@property (nonatomic, assign) CGRect simpleColorGridBaseFrame;
+@property (nonatomic, assign) CGRect doneButtonBaseFrame;
 
 @end
 
@@ -46,13 +26,13 @@
     if (self) {
         _colorArray = [NSMutableArray array];
         
-        int colorCount = NEOColorPicker4InchDisplay() ? 20 : 16;
+        int colorCount = NEOColorPicker4InchDisplay() ? 18 : 16;
         for (int i = 0; i < colorCount; i++) {
             UIColor *color = [UIColor colorWithHue:i / (float)colorCount saturation:1.0 brightness:1.0 alpha:1.0];
             [_colorArray addObject:color];
         }
         
-        colorCount = NEOColorPicker4InchDisplay() ? 8 : 4;
+        colorCount = NEOColorPicker4InchDisplay() ? 6 : 4;
         for (int i = 0; i < colorCount; i++) {
             UIColor *color = [UIColor colorWithWhite:i/(float)(colorCount - 1) alpha:1.0];
             [_colorArray addObject:color];
@@ -63,62 +43,66 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    if (!self.selectedColor) {
+    
+    self.selectedColorLabel.frame = CGRectMake(20, 10, 130, 40);
+    self.selectedColorLabelBaseFrame = self.selectedColorLabel.frame;
+    self.simpleColorGrid.frame = CGRectMake(0, 60, 320, 320);
+    self.simpleColorGridBaseFrame = self.simpleColorGrid.frame;
+    // position this button in line with the hue button programmatically (not with a magic number)
+    self.doneButton.frame = CGRectMake(240, self.buttonHue.frame.origin.y - self.buttonHue.frame.size.height/2, 80, 70);
+    self.doneButtonBaseFrame = self.doneButton.frame;
+    
+    self.colorLayers = [NSMutableArray array];
+    self.selectedColorLabel.numberOfLines = 5;
+    
+    if (!self.selectedColor)
+    {
         self.selectedColor = [UIColor blackColor];
     }
-
     if (self.selectedColorText.length != 0)
     {
         self.selectedColorLabel.text = self.selectedColorText;
     }
+    if (self.doneButtonText.length != 0)
+    {
+        [self.doneButton setTitle:self.doneButtonText forState:UIControlStateNormal];
+    }
     self.simpleColorGrid.backgroundColor = [UIColor clearColor];
     
     [self.buttonHue setBackgroundColor:[UIColor clearColor]];
-//    [NTTAppDefaults setupSecondaryButton:self.buttonHue];
+    //    [NTTAppDefaults setupSecondaryButton:self.buttonHue];
     [self.buttonHue setImage:[UIImage imageNamed:@"colorPicker.bundle/hue_selector"] forState:UIControlStateNormal];
     
     [self.buttonAddFavorite setBackgroundColor:[UIColor clearColor]];
-//    [NTTAppDefaults setupSecondaryButton:self.buttonAddFavorite];
+    //    [NTTAppDefaults setupSecondaryButton:self.buttonAddFavorite];
     [self.buttonAddFavorite setImage:[UIImage imageNamed:@"colorPicker.bundle/picker-favorites-add"] forState:UIControlStateNormal];
     
     [self.buttonFavorites setBackgroundColor:[UIColor clearColor]];
-//    [NTTAppDefaults setupSecondaryButton:self.buttonFavorites];
+    //    [NTTAppDefaults setupSecondaryButton:self.buttonFavorites];
     [self.buttonFavorites setImage:[UIImage imageNamed:@"colorPicker.bundle/picker-favorites"] forState:UIControlStateNormal];
     
     [self.buttonHueGrid setBackgroundColor:[UIColor clearColor]];
-//    [NTTAppDefaults setupSecondaryButton:self.buttonHueGrid];
+    //    [NTTAppDefaults setupSecondaryButton:self.buttonHueGrid];
     [self.buttonHueGrid setImage:[UIImage imageNamed:@"colorPicker.bundle/picker-grid"] forState:UIControlStateNormal];
     
-    CGRect frame = CGRectMake(130, 16, 100, 40);
-    UIImageView *checkeredView = [[UIImageView alloc] initWithFrame:frame];
+    self.selectedColoerFrame = [self getFrameNextToLabel:self.selectedColorLabel]; //CGRectMake(130, 16, 100, 40);
+    UIImageView *checkeredView = [[UIImageView alloc] initWithFrame:self.selectedColoerFrame];
     checkeredView.layer.cornerRadius = 6.0;
     checkeredView.layer.masksToBounds = YES;
     checkeredView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"colorPicker.bundle/color-picker-checkered"]];
-    [self.view addSubview:checkeredView];
+    [self.centeredView addSubview:checkeredView];
     
     CALayer *layer = [CALayer layer];
-    layer.frame = CGRectMake(130, 16, 100, 40);
+    layer.frame = self.selectedColoerFrame;
     layer.cornerRadius = 6.0;
     layer.shadowColor = [UIColor blackColor].CGColor;
     layer.shadowOffset = CGSizeMake(0, 2);
     layer.shadowOpacity = 0.8;
     
-    [self.view.layer addSublayer:layer];
+    [self.centeredView.layer addSublayer:layer];
     self.selectedColorLayer = layer;
     
-    int colorCount = NEOColorPicker4InchDisplay() ? 28 : 20;
-    for (int i = 0; i < colorCount && i < _colorArray.count; i++) {
-        CALayer *layer = [CALayer layer];
-        layer.cornerRadius = 6.0;
-        UIColor *color = [_colorArray objectAtIndex:i];
-        layer.backgroundColor = color.CGColor;
-        
-        int column = i % 4;
-        int row = i / 4;
-        layer.frame = CGRectMake(8 + (column * 78), 8 + row * 48, 70, 40);
-        [self setupShadow:layer];
-        [self.simpleColorGrid.layer addSublayer:layer];
-    }
+    [self repositionTheColorsPalette];
     
     UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(colorGridTapped:)];
     [self.simpleColorGrid addGestureRecognizer:recognizer];
@@ -141,33 +125,45 @@
     int row = (int)((point.y - 8) / 48);
     int column = (int)((point.x - 8) / 78);
     int index = row * 4 + column;
-	
-	if (index < _colorArray.count) {
-		self.selectedColor = [_colorArray objectAtIndex:index];
-	}
+    int colorCount = NEOColorPicker4InchDisplay() ? 24 : 20;
+    if (index < colorCount)
+    {
+        self.selectedColor = [_colorArray objectAtIndex:index];
+    }
     [self updateSelectedColor];
 }
 
 
 - (IBAction)buttonPressCancel:(id)sender {
-    self.selectedColor = nil;
     [self.delegate colorPickerViewControllerDidCancel:self];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)buttonPressDone:(id)sender {
     [self.delegate colorPickerViewController:self didSelectColor:self.selectedColor];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 
 - (IBAction)buttonPressHue:(id)sender {
     NEOColorPickerHSLViewController *controller = [[NEOColorPickerHSLViewController alloc] init];
     controller.delegate = self;
+    
+    // passing these translated strings along to the new view controller
+    controller.saturationText = self.saturationText;
+    controller.luminosityText = self.luminosityText;
+    controller.hueText = self.hueText;
+    controller.transparencyText = self.transparencyText;
+    controller.doneButtonText = self.doneButtonText;
+    controller.selectedText = self.selectedText;
+    
     controller.title = self.title;
     controller.disallowOpacitySelection = self.disallowOpacitySelection;
     controller.selectedColor = self.selectedColor;
     self.savedColor = self.selectedColor;
-    controller.modalPresentationStyle = UIModalPresentationCurrentContext;
-    [self.navigationController pushViewController:controller animated:YES];
+    
+    controller.modalPresentationStyle = UIModalPresentationFormSheet;
+    [self presentViewController:controller animated:YES completion:nil];
 }
 
 
@@ -178,7 +174,8 @@
         self.selectedColor = color;
     }
     [self updateSelectedColor];
-    [self.navigationController popViewControllerAnimated:YES];
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void) colorPickerViewController:(NEOColorPickerBaseViewController *) controller didChangeColor:(UIColor *)color {
@@ -187,13 +184,13 @@
 }
 
 - (void)colorPickerViewControllerDidCancel:(NEOColorPickerBaseViewController *)controller {
-    [self.navigationController popViewControllerAnimated:YES];
-
     if (self.savedColor != nil) {
         self.selectedColor = self.savedColor;
         [self updateSelectedColor];
         self.savedColor = nil;
     }
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (IBAction)buttonPressHueGrid:(id)sender {
@@ -201,10 +198,20 @@
     controller.delegate = self;
     controller.title = self.title;
     controller.selectedColor = self.selectedColor;
+    
+    // passing these translated strings along to the new view controller
     controller.selectedColorText = self.selectedColorText;
+    controller.saturationText = self.saturationText;
+    controller.luminosityText = self.luminosityText;
+    controller.hueText = self.hueText;
+    controller.transparencyText = self.transparencyText;
+    controller.doneButtonText = self.doneButtonText;
+    controller.selectedText = self.selectedText;
+    
     self.savedColor = self.selectedColor;
-    controller.modalPresentationStyle = UIModalPresentationCurrentContext;
-    [self.navigationController pushViewController:controller animated:YES];
+    
+    controller.modalPresentationStyle = UIModalPresentationFormSheet;
+    [self presentViewController:controller animated:YES completion:nil];
 }
 
 - (IBAction)buttonPressAddFavorite:(id)sender {
@@ -219,10 +226,132 @@
     controller.delegate = self;
     controller.selectedColor = self.selectedColor;
     controller.title = (self.favoritesTitle.length == 0 ? @"Favorites" : self.favoritesTitle);
+    
+    // passing these translated strings along to the new view controller
     controller.selectedColorText = self.selectedColorText;
+    controller.saturationText = self.saturationText;
+    controller.luminosityText = self.luminosityText;
+    controller.hueText = self.hueText;
+    controller.transparencyText = self.transparencyText;
+    controller.doneButtonText = self.doneButtonText;
+    controller.selectedText = self.selectedText;
+    
     self.savedColor = self.selectedColor;
-    controller.modalPresentationStyle = UIModalPresentationCurrentContext;
-    [self.navigationController pushViewController:controller animated:YES];
+    
+    controller.modalPresentationStyle = UIModalPresentationFormSheet;
+    [self presentViewController:controller animated:YES completion:nil];
+}
+
+- (void)updateForDeviceOrientation:(UIDeviceOrientation)orientation animated:(BOOL)animated
+{
+    CGFloat degrees = 0.0f;
+    switch (orientation)
+    {
+        case UIDeviceOrientationLandscapeLeft:
+            degrees = 90.0f;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            degrees = -90.0f;
+            break;
+        case UIDeviceOrientationPortrait:
+            degrees = 0.0f;
+            break;
+        default:
+            return;
+            break;
+    }
+    
+    CGFloat duration = (animated) ? [UIApplication sharedApplication].statusBarOrientationAnimationDuration : 0.0f;
+    
+    [UIView animateWithDuration:duration animations:^{
+        // Rotate view
+        [self rotateView:self.selectedColorLabel withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.simpleColorGrid withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.buttonAddFavorite withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.buttonFavorites withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.buttonHue withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.doneButton withDegrees:degrees andOrientation:orientation];
+        
+    } completion:^(BOOL finished){[self repositionTheColorsPalette];}];
+}
+
+-(CGRect)getBaseViewFrameForView:(UIView*)view
+{
+    if (view == self.selectedColorLabel)
+    {
+        return self.selectedColorLabelBaseFrame;
+    }
+    if (view == self.simpleColorGrid)
+    {
+        return self.simpleColorGridBaseFrame;
+    }
+    if (view == self.doneButton)
+    {
+        return self.doneButtonBaseFrame;
+    }
+    
+    return view.frame;
+}
+
+-(void)rotateView:(UIView*)rotatingView withDegrees:(CGFloat)degrees andOrientation:(UIDeviceOrientation)orientation
+{
+    rotatingView.transform = CGAffineTransformIdentity;
+    rotatingView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+    
+    if (rotatingView != self.simpleColorGrid)
+    {
+        CGRect baseRect = [self getBaseViewFrameForView:rotatingView];
+        CGFloat width = CGRectGetWidth(baseRect);
+        CGFloat height = CGRectGetHeight(baseRect);
+        if (degrees != 0)
+        {
+            // Resize view for rotation
+            width = CGRectGetHeight(baseRect);
+            height = CGRectGetWidth(baseRect);
+        }
+        CGSize newSize = CGSizeMake(width, height);
+        
+        CGRect viewBounds = rotatingView.bounds;
+        viewBounds.size = newSize;
+        rotatingView.bounds = viewBounds;
+        
+        CGRect viewFrame = rotatingView.frame;
+        viewFrame.size = newSize;
+        rotatingView.bounds = viewFrame;
+    }
+}
+
+-(void)repositionTheColorsPalette
+{
+    @try
+    {
+        for (CALayer *colorLayer in self.colorLayers)
+        {
+            [colorLayer removeFromSuperlayer];
+        }
+        [self.simpleColorGrid.layer setNeedsDisplay];
+        [self.colorLayers removeAllObjects];
+        int colorCount = NEOColorPicker4InchDisplay() ? 24 : 20;
+        for (int i = 0; i < colorCount; i++)
+        {
+            CALayer *layer = [CALayer layer];
+            layer.cornerRadius = 6.0;
+            UIColor *color = [_colorArray objectAtIndex:i];
+            layer.backgroundColor = color.CGColor;
+            
+            int column = i % 4;
+            int row = i / 4;
+            layer.frame = CGRectMake(8 + (column * 78), 8 + row * 48, 70, 40);
+            [self setupShadow:layer];
+            [self.simpleColorGrid.layer addSublayer:layer];
+            [self.colorLayers addObject:layer];
+        }
+        
+    }
+    @catch (NSException *exception)
+    {
+        
+    }
 }
 
 @end

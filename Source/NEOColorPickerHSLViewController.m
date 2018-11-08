@@ -1,28 +1,3 @@
-//
-//  NEOColorPickerViewController.m
-//
-//  Created by Karthik Abram on 10/10/12.
-//  Copyright (c) 2012 Neovera Inc.
-//
-
-
-/*
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- 
- */
-
-
 #import "NEOColorPickerHSLViewController.h"
 #import "UIColor+NEOColor.h"
 #import "NEOColorPickerGradientView.h"
@@ -40,6 +15,12 @@
     CALayer *_colorLayer;
     CGFloat _hue, _saturation, _luminosity, _alpha;
 }
+
+@property (nonatomic, assign) CGRect saturationLabelBaseFrame;
+@property (nonatomic, assign) CGRect luminosityLabelBaseFrame;
+@property (nonatomic, assign) CGRect labelTransparencyBaseFrame;
+@property (nonatomic, assign) CGRect doneButtonBaseFrame;
+
 @end
 
 @implementation NEOColorPickerHSLViewController
@@ -51,6 +32,12 @@
     }
     
     [super viewDidLoad];
+    
+    self.saturationLabelBaseFrame = self.saturationLabel.frame;
+    self.luminosityLabelBaseFrame = self.luminosityLabel.frame;
+    self.labelTransparencyBaseFrame = self.labelTransparency.frame;
+    self.doneButton.frame = CGRectMake(240, 390, 80, 70);
+    self.doneButtonBaseFrame = self.doneButton.frame;
     
     self.checkeredView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:CP_RESOURCE_CHECKERED_IMAGE]];
     self.hueImageView.image = [UIImage imageNamed:CP_RESOURCE_HUE_CIRCLE];
@@ -65,7 +52,7 @@
     frame.size = CGSizeMake(100, 100);
     _colorLayer.frame = frame;
     _colorLayer.backgroundColor = self.selectedColor.CGColor;
-    [self.view.layer addSublayer:_colorLayer];
+    [self.centeredView.layer addSublayer:_colorLayer];
     [_colorLayer setNeedsDisplay];
     
     self.hueCrosshair.image = [UIImage imageNamed:CP_RESOURCE_HUE_CROSSHAIR];
@@ -77,21 +64,21 @@
     self.gradientViewSaturation.layer.borderColor = [UIColor grayColor].CGColor;
     self.gradientViewSaturation.layer.borderWidth = 2.0;
     self.gradientViewSaturation.delegate = self;
-
+    
     self.gradientViewLuminosity.backgroundColor = [UIColor clearColor];
     self.gradientViewLuminosity.layer.masksToBounds = YES;
     self.gradientViewLuminosity.layer.cornerRadius = 5.0;
     self.gradientViewLuminosity.layer.borderColor = [UIColor grayColor].CGColor;
     self.gradientViewLuminosity.layer.borderWidth = 2.0;
     self.gradientViewLuminosity.delegate = self;
-
+    
     self.gradientViewAlpha.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:CP_RESOURCE_CHECKERED_IMAGE]];
     self.gradientViewAlpha.layer.masksToBounds = YES;
     self.gradientViewAlpha.layer.cornerRadius = 5.0;
     self.gradientViewAlpha.layer.borderColor = [UIColor grayColor].CGColor;
     self.gradientViewAlpha.layer.borderWidth = 2.0;
-    self.gradientViewAlpha.delegate = self;  
-
+    self.gradientViewAlpha.delegate = self;
+    
     [[self.selectedColor neoToHSL] getHue:&_hue saturation:&_saturation brightness:&_luminosity alpha:&_alpha];
     if (self.disallowOpacitySelection) {
         _alpha = 1.0;
@@ -117,16 +104,36 @@
     [self.buttonSatMax setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MAX] forState:UIControlStateNormal];
     self.buttonSatMin.backgroundColor = [UIColor clearColor];
     [self.buttonSatMin setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MIN] forState:UIControlStateNormal];
-
+    
     self.buttonLumMax.backgroundColor = [UIColor clearColor];
     [self.buttonLumMax setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MAX] forState:UIControlStateNormal];
     self.buttonLumMin.backgroundColor = [UIColor clearColor];
     [self.buttonLumMin setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MIN] forState:UIControlStateNormal];
-
+    
     self.buttonAlphaMax.backgroundColor = [UIColor clearColor];
     [self.buttonAlphaMax setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MAX] forState:UIControlStateNormal];
     self.buttonAlphaMin.backgroundColor = [UIColor clearColor];
     [self.buttonAlphaMin setImage:[UIImage imageNamed:CP_RESOURCE_VALUE_MIN] forState:UIControlStateNormal];
+    
+    if (self.saturationText.length != 0) {
+        self.saturationLabel.text = self.saturationText;
+    }
+    if (self.luminosityText.length != 0) {
+        self.luminosityLabel.text = self.luminosityText;
+    }
+    if (self.hueText.length != 0) {
+        self.hueLabel.text = self.hueText;
+    }
+    if (self.transparencyText.length != 0) {
+        self.labelTransparency.text = self.transparencyText;
+    }
+    if (self.doneButtonText.length != 0) {
+        [self.doneButton setTitle:self.doneButtonText forState:UIControlStateNormal];
+    }
+    if (self.selectedText.length != 0)
+    {
+        self.labelPreview.text = self.selectedText;
+    }
 }
 
 
@@ -167,11 +174,12 @@
     [_colorLayer setNeedsDisplay];
     
     self.labelPreview.textColor = [[self.selectedColor neoComplementary] neoColorWithAlpha:1.0];
-
+    
     if ([self.delegate respondsToSelector:@selector(colorPickerViewController:didChangeColor:)]) {
         [self.delegate colorPickerViewController:self didChangeColor:self.selectedColor];
     }
 }
+
 
 - (void) huePanOrTap:(UIGestureRecognizer *)recognizer {
     switch (recognizer.state) {
@@ -233,5 +241,112 @@
     [self valuesChanged];
 }
 
+- (IBAction)doneButtonClicked:(UIButton *)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)updateForDeviceOrientation:(UIDeviceOrientation)orientation animated:(BOOL)animated
+{
+    CGFloat degrees = 0.0f;
+    switch (orientation)
+    {
+        case UIDeviceOrientationLandscapeLeft:
+            degrees = 90.0f;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            degrees = -90.0f;
+            break;
+        case UIDeviceOrientationPortrait:
+            degrees = 0.0f;
+            break;
+        default:
+            return;
+            break;
+    }
+    
+    CGFloat duration = (animated) ? [UIApplication sharedApplication].statusBarOrientationAnimationDuration : 0.0f;
+    
+    [UIView animateWithDuration:duration animations:^{
+        // Rotate view
+        [self rotateView:self.saturationLabel withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.luminosityLabel withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.hueLabel withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.labelPreview withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.labelTransparency withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.doneButton withDegrees:degrees andOrientation:orientation];
+        
+    }];
+}
+
+-(CGRect)getBaseViewFrameForView:(UIView*)view
+{
+    if (view == self.saturationLabel)
+    {
+        return self.saturationLabelBaseFrame;
+    }
+    if (view == self.luminosityLabel)
+    {
+        return self.luminosityLabelBaseFrame;
+    }
+    if (view == self.labelTransparency)
+    {
+        return self.labelTransparencyBaseFrame;
+    }
+    if (view == self.doneButton)
+    {
+        return self.doneButtonBaseFrame;
+    }
+    
+    return CGRectZero;
+}
+
+-(BOOL)isLabelHiddenWhenRotated:(UIView*)rotatingView
+{
+    return (rotatingView == self.saturationLabel || rotatingView == self.luminosityLabel || rotatingView == self.labelTransparency);
+}
+
+-(void)rotateView:(UIView*)rotatingView withDegrees:(CGFloat)degrees andOrientation:(UIDeviceOrientation)orientation
+{
+    rotatingView.transform = CGAffineTransformIdentity;
+    rotatingView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+    
+    if (rotatingView == self.doneButton)
+    {
+        CGRect baseRect = [self getBaseViewFrameForView:rotatingView];
+        CGFloat width = CGRectGetWidth(baseRect);
+        CGFloat height = CGRectGetHeight(baseRect);
+        if (degrees != 0)
+        {
+            // Resize view for rotation
+            width = CGRectGetHeight(baseRect);
+            height = CGRectGetWidth(baseRect);
+        }
+        CGSize newSize = CGSizeMake(width, height);
+        
+        CGRect viewBounds = rotatingView.bounds;
+        viewBounds.size = newSize;
+        rotatingView.bounds = viewBounds;
+        
+        CGRect viewFrame = rotatingView.frame;
+        viewFrame.size = newSize;
+        rotatingView.bounds = viewFrame;
+        return;
+    }
+    
+    if ([self isLabelHiddenWhenRotated:rotatingView])
+    {
+        if (degrees != 0)
+        {
+            CGAffineTransform moveDown = CGAffineTransformMakeTranslation(0, 30);
+            rotatingView.transform = CGAffineTransformConcat(rotatingView.transform, moveDown);
+        }
+    }
+}
+
+-(void)repositionTheColorsPalette
+{
+    return;
+}
 
 @end

@@ -1,27 +1,3 @@
-//
-//  NEOColorPickerHueGridViewController.m
-//
-//  Created by Karthik Abram on 10/23/12.
-//  Copyright (c) 2012 Neovera Inc.
-//
-
-/*
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- 
- */
-
-
 #import "NEOColorPickerHueGridViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -30,6 +6,10 @@
 
 @property (nonatomic, weak) CALayer *selectedColorLayer;
 @property (nonatomic, strong) NSMutableArray *hueColors;
+@property (nonatomic, strong) NSMutableArray *colorLayers;
+@property (nonatomic, assign) CGRect selectedColorLabelBaseFrame;
+@property (nonatomic, assign) CGRect scrollViewBaseFrame;
+@property (nonatomic, assign) CGRect doneButtonBaseFrame;
 
 @end
 
@@ -61,48 +41,47 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
+    self.colorLayers = [NSMutableArray array];
+    
+    self.selectedColorLabel.frame = CGRectMake(20, 10, 130, 40);
+    self.selectedColorLabelBaseFrame = self.selectedColorLabel.frame;
+    self.scrollView.frame = CGRectMake(0, 65, 320, 330);
+    self.scrollViewBaseFrame = self.scrollView.frame;
+    self.doneButton.frame = CGRectMake(240, 0, 80, 65);
+    self.doneButtonBaseFrame = self.doneButton.frame;
+    
+    self.selectedColorLabel.numberOfLines = 5;
     if (self.selectedColorText.length != 0)
     {
         self.selectedColorLabel.text = self.selectedColorText;
     }
+    if (self.doneButtonText.length != 0)
+    {
+        [self.doneButton setTitle:self.doneButtonText forState:UIControlStateNormal];
+    }
     
-    CGRect frame = CGRectMake(130, 16, 100, 40);
-    UIImageView *checkeredView = [[UIImageView alloc] initWithFrame:frame];
+    self.selectedColoerFrame = [self getFrameNextToLabel:self.selectedColorLabel]; //CGRectMake(130, 16, 100, 40);
+    UIImageView *checkeredView = [[UIImageView alloc] initWithFrame:self.selectedColoerFrame];
     checkeredView.layer.cornerRadius = 6.0;
     checkeredView.layer.masksToBounds = YES;
     checkeredView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"colorPicker.bundle/color-picker-checkered"]];
-    [self.view addSubview:checkeredView];
+    [self.centeredView addSubview:checkeredView];
     
     CALayer *layer = [CALayer layer];
-    layer.frame = CGRectMake(130, 16, 100, 40);
+    layer.frame = self.selectedColoerFrame;
     layer.cornerRadius = 6.0;
     layer.shadowColor = [UIColor blackColor].CGColor;
     layer.shadowOffset = CGSizeMake(0, 2);
     layer.shadowOpacity = 0.8;
     
-    [self.view.layer addSublayer:layer];
+    [self.centeredView.layer addSublayer:layer];
     self.selectedColorLayer = layer;
     self.selectedColorLayer.backgroundColor = self.selectedColor.CGColor;
     
-    int index = 0;
-    for (int i = 0; i < 12; i++) {
-        int colorCount = NEOColorPicker4InchDisplay() ? 32 : 24;
-        for (int x = 0; x < colorCount && index < self.hueColors.count; x++) {
-            CALayer *layer = [CALayer layer];
-            layer.cornerRadius = 6.0;
-            UIColor *color = [self.hueColors objectAtIndex:index++];
-            layer.backgroundColor = color.CGColor;
-            
-            int column = x % 4;
-            int row = x / 4;
-            layer.frame = CGRectMake(i * 320 + 8 + (column * 78), 8 + row * 48, 70, 40);
-            [self setupShadow:layer];
-            [self.scrollView.layer addSublayer:layer];
-        }
-    }
-
-    self.scrollView.contentSize = CGSizeMake(3840, 296);
+    [self repositionTheColorsPalette];
+    
+    
     self.colorBar.image = [UIImage imageNamed:@"colorPicker.bundle/color-bar"];
     
     UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(colorGridTapped:)];
@@ -113,32 +92,136 @@
     [self.colorBar addGestureRecognizer:barRecognizer];
 }
 
-
 - (void) colorGridTapped:(UITapGestureRecognizer *)recognizer {
     CGPoint point = [recognizer locationInView:self.scrollView];
-    int page = point.x / 320;
-    int delta = (int)point.x % 320;
+    int page = point.x / CGRectGetWidth(self.scrollView.bounds);
+    int delta = (int)point.x % ((int)CGRectGetWidth(self.scrollView.bounds));
     
     int row = (int)((point.y - 8) / 48);
     int column = (int)((delta - 8) / 78);
     int colorCount = NEOColorPicker4InchDisplay() ? 32 : 24;
     int index = colorCount * page + row * 4 + column;
-	if (index < self.hueColors.count) {
-		self.selectedColor = [self.hueColors objectAtIndex:index];
-		self.selectedColorLayer.backgroundColor = self.selectedColor.CGColor;
-		[self.selectedColorLayer setNeedsDisplay];
-
-		if ([self.delegate respondsToSelector:@selector(colorPickerViewController:didChangeColor:)]) {
-			[self.delegate colorPickerViewController:self didChangeColor:self.selectedColor];
-		}
-	}
+    self.selectedColor = [self.hueColors objectAtIndex:index];
+    self.selectedColorLayer.backgroundColor = self.selectedColor.CGColor;
+    [self.selectedColorLayer setNeedsDisplay];
+    
+    if ([self.delegate respondsToSelector:@selector(colorPickerViewController:didChangeColor:)]) {
+        [self.delegate colorPickerViewController:self didChangeColor:self.selectedColor];
+    }
 }
 
 
 - (void) colorBarTapped:(UITapGestureRecognizer *)recognizer {
     CGPoint point = [recognizer locationInView:self.colorBar];
     int page = point.x / 25;
-    [self.scrollView scrollRectToVisible:CGRectMake(page*320, 0, 320, self.scrollView.frame.size.height) animated:YES];
+    [self.scrollView scrollRectToVisible:CGRectMake(page*CGRectGetWidth(self.scrollView.bounds), 0, CGRectGetWidth(self.scrollView.bounds), CGRectGetHeight(self.scrollView.bounds)) animated:YES];
+}
+
+- (IBAction)doneButtonClicked:(UIButton *)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)updateForDeviceOrientation:(UIDeviceOrientation)orientation animated:(BOOL)animated
+{
+    CGFloat degrees = 0.0f;
+    switch (orientation)
+    {
+        case UIDeviceOrientationLandscapeLeft:
+            degrees = 90.0f;
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            degrees = -90.0f;
+            break;
+        case UIDeviceOrientationPortrait:
+            degrees = 0.0f;
+            break;
+        default:
+            return;
+            break;
+    }
+    
+    CGFloat duration = (animated) ? [UIApplication sharedApplication].statusBarOrientationAnimationDuration : 0.0f;
+    
+    [UIView animateWithDuration:duration animations:^{
+        // Rotate view
+        [self rotateView:self.selectedColorLabel withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.scrollView withDegrees:degrees andOrientation:orientation];
+        [self rotateView:self.doneButton withDegrees:degrees andOrientation:orientation];
+        
+    } completion:^(BOOL finished){[self repositionTheColorsPalette];}];
+}
+
+-(CGRect)getBaseViewFrameForView:(UIView*)view
+{
+    if (view == self.selectedColorLabel)
+    {
+        return self.selectedColorLabelBaseFrame;
+    }
+    if (view == self.scrollView)
+    {
+        return self.scrollViewBaseFrame;
+    }
+    if (view == self.doneButton)
+    {
+        return self.doneButtonBaseFrame;
+    }
+    
+    return CGRectZero;
+}
+
+-(void)rotateView:(UIView*)rotatingView withDegrees:(CGFloat)degrees andOrientation:(UIDeviceOrientation)orientation
+{
+    rotatingView.transform = CGAffineTransformIdentity;
+    rotatingView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+    
+    CGRect baseRect = [self getBaseViewFrameForView:rotatingView];
+    CGFloat width = CGRectGetWidth(baseRect);
+    CGFloat height = CGRectGetHeight(baseRect);
+    if (degrees != 0)
+    {
+        // Resize view for rotation
+        width = CGRectGetHeight(baseRect);
+        height = CGRectGetWidth(baseRect);
+    }
+    CGSize newSize = CGSizeMake(width, height);
+    
+    CGRect viewBounds = rotatingView.bounds;
+    viewBounds.size = newSize;
+    rotatingView.bounds = viewBounds;
+    
+    CGRect viewFrame = rotatingView.frame;
+    viewFrame.size = newSize;
+    rotatingView.bounds = viewFrame;
+}
+
+-(void)repositionTheColorsPalette
+{
+    [UIView animateWithDuration:0.1 animations:^{
+        for (CALayer *colorLayer in self.colorLayers)
+        {
+            [colorLayer removeFromSuperlayer];
+        }
+        [self.colorLayers removeAllObjects];
+        int index = 0;
+        for (int i = 0; i < 12; i++) {
+            int colorCount = NEOColorPicker4InchDisplay() ? 32 : 24;
+            for (int x = 0; x < colorCount; x++) {
+                CALayer *layer = [CALayer layer];
+                layer.cornerRadius = 6.0;
+                UIColor *color = [self.hueColors objectAtIndex:index++];
+                layer.backgroundColor = color.CGColor;
+                
+                int column = x % 4;
+                int row = x / 4;
+                layer.frame = CGRectMake(i * CGRectGetWidth(self.scrollView.bounds) + 8 + (column * 78), 8 + row * 48, 70, 40);
+                [self setupShadow:layer];
+                [self.scrollView.layer addSublayer:layer];
+                [self.colorLayers addObject:layer];
+            }
+        }
+        self.scrollView.contentSize = CGSizeMake(12 * CGRectGetWidth(self.scrollView.bounds), 296);
+    }];
 }
 
 @end

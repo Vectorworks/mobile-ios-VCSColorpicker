@@ -1,26 +1,3 @@
-//
-//  NEOColorPickerBaseViewController.m
-//
-//  Created by Karthik Abram on 10/23/12.
-//  Copyright (c) 2012 Neovera Inc.
-//
-
-/*
- 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
- http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- 
-*/
-
 #import "NEOColorPickerBaseViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -43,13 +20,13 @@
 
 - (id)init {
     if (self = [super init]) {
-
+        
         NSFileManager *fs = [NSFileManager defaultManager];
         NSString *filename = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0] stringByAppendingPathComponent:@"neoFavoriteColors.data"];
         if ([fs isReadableFileAtPath:filename]) {
             _favorites = [[NSMutableOrderedSet alloc] initWithOrderedSet:[NSKeyedUnarchiver unarchiveObjectWithFile:filename]];
         } else {
-            _favorites = [[NSMutableOrderedSet alloc] init];            
+            _favorites = [[NSMutableOrderedSet alloc] init];
         }
     }
     
@@ -90,15 +67,19 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(buttonPressCancel:)];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(buttonPressDone:)];
     self.preferredContentSize = CGSizeMake(320.0f, 460.0f);
-
-    if ([UIDevice currentDevice].systemVersion.floatValue >= 7.0f)
+    
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
-        self.edgesForExtendedLayout = UIRectEdgeNone;
-        self.extendedLayoutIncludesOpaqueBars = NO;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
+        UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+        if (orientation != UIDeviceOrientationPortrait)
+        {
+            [self didRotate:nil];
+        }
     }
 }
 
@@ -112,15 +93,67 @@
     [self.delegate colorPickerViewController:self didSelectColor:self.selectedColor];
 }
 
+-(CGRect)getFrameNextToLabel:(UILabel*)label
+{
+    CGRect nextToLabelFrame = CGRectMake((label.frame.origin.x + label.frame.size.width), label.frame.origin.y, 80, 40);
+    return nextToLabelFrame;
+}
 
 
 - (void) setupShadow:(CALayer *)layer {
+    layer.shadowColor = [UIColor clearColor].CGColor;
     layer.shadowColor = [UIColor blackColor].CGColor;
     layer.shadowOpacity = 0.8;
+    layer.shadowOffset = CGSizeZero;
     layer.shadowOffset = CGSizeMake(0, 2);
     CGRect rect = layer.frame;
     rect.origin = CGPointZero;
+    layer.shadowPath = [UIBezierPath bezierPath].CGPath;
     layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:layer.cornerRadius].CGPath;
+}
+
+- (void)updateForDeviceOrientation:(UIDeviceOrientation)orientation animated:(BOOL)animated
+{
+}
+
+-(void)repositionTheColorsPalette
+{
+}
+
+-(void)didRotate:(NSNotification*)notification
+{
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    [self updateForDeviceOrientation:orientation animated:YES];
+}
+
+-(void)rotateView:(UIView*)rotatingView withDegrees:(CGFloat)degrees andOrientation:(UIDeviceOrientation)orientation
+{
+    rotatingView.transform = CGAffineTransformIdentity;
+    rotatingView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+    
+    // Resize view for rotation
+    CGFloat width = CGRectGetWidth(rotatingView.bounds);
+    CGFloat height = CGRectGetHeight(rotatingView.bounds);
+    if (width <= height)
+    {
+        width = MAX(CGRectGetWidth(rotatingView.bounds), CGRectGetHeight(rotatingView.bounds));
+        height = MIN(CGRectGetWidth(rotatingView.bounds), CGRectGetHeight(rotatingView.bounds));
+    }
+    else
+    {
+        width = MIN(CGRectGetWidth(rotatingView.bounds), CGRectGetHeight(rotatingView.bounds));
+        height = MAX(CGRectGetWidth(rotatingView.bounds), CGRectGetHeight(rotatingView.bounds));
+    }
+    
+    CGSize newSize = CGSizeMake(width, height);
+    
+    CGRect viewBounds = rotatingView.bounds;
+    viewBounds.size = newSize;
+    rotatingView.bounds = viewBounds;
+    
+    CGRect viewFrame = rotatingView.frame;
+    viewFrame.size = newSize;
+    rotatingView.bounds = viewFrame;
 }
 
 @end
