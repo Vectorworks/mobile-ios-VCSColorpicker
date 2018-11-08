@@ -114,13 +114,6 @@
 }
 
 
-- (void)viewDidUnload {
-    [self setScrollView:nil];
-    [self setColorBar:nil];
-    [super viewDidUnload];
-}
-
-
 - (void) colorGridTapped:(UITapGestureRecognizer *)recognizer {
     CGPoint point = [recognizer locationInView:self.scrollView];
     int page = point.x / 320;

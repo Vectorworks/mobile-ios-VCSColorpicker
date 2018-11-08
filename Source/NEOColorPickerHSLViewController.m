@@ -173,27 +173,6 @@
     }
 }
 
-
-- (void)viewDidUnload {
-    _colorLayer = nil;
-    [self setHueCrosshair:nil];
-    [self setGradientViewSaturation:nil];
-    [self setGradientViewLuminosity:nil];
-    [self setGradientViewAlpha:nil];
-    [self setCheckeredView:nil];
-    [self setButtonSatMin:nil];
-    [self setButtonSatMax:nil];
-    [self setButtonLumMax:nil];
-    [self setButtonAlphaMax:nil];
-    [self setButtonAlphaMin:nil];
-    [self setButtonAlphaMin:nil];
-    [self setButtonLumMin:nil];
-    [self setLabelTransparency:nil];
-    [self setLabelPreview:nil];
-    [super viewDidUnload];
-}
-
-
 - (void) huePanOrTap:(UIGestureRecognizer *)recognizer {
     switch (recognizer.state) {
         case UIGestureRecognizerStateBegan:

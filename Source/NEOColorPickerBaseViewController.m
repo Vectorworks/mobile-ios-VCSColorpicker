@@ -83,13 +83,7 @@
 
 @implementation NEOColorPickerBaseViewController
 
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? YES : UIInterfaceOrientationIsPortrait(interfaceOrientation));
-}
-
-
-- (NSUInteger)supportedInterfaceOrientations {
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? UIInterfaceOrientationMaskAll : UIInterfaceOrientationMaskPortrait);
 }
 
@@ -99,14 +93,12 @@
 
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(buttonPressCancel:)];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(buttonPressDone:)];
-
-    self.contentSizeForViewInPopover = CGSizeMake(320.0f, 460.0f);
+    self.preferredContentSize = CGSizeMake(320.0f, 460.0f);
 
     if ([UIDevice currentDevice].systemVersion.floatValue >= 7.0f)
     {
         self.edgesForExtendedLayout = UIRectEdgeNone;
         self.extendedLayoutIncludesOpaqueBars = NO;
-        self.automaticallyAdjustsScrollViewInsets = NO;
     }
 }
 

@@ -125,16 +125,6 @@
 }
 
 
-- (void)viewDidUnload {
-    [self setSimpleColorGrid:nil];
-    [self setButtonHue:nil];
-    [self setButtonAddFavorite:nil];
-    [self setButtonFavorites:nil];
-    [self setButtonHueGrid:nil];
-    [super viewDidUnload];
-}
-
-
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self updateSelectedColor];
