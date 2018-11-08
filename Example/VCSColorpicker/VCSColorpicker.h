@@ -8,16 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
-//! Project version number for VCSColorpicker1.
+//! Project version number for VCSColorpicker.
 FOUNDATION_EXPORT double VCSColorpicker1VersionNumber;
 
-//! Project version string for VCSColorpicker1.
+//! Project version string for VCSColorpicker.
 FOUNDATION_EXPORT const unsigned char VCSColorpicker1VersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <VCSColorpicker1/PublicHeader.h>
-
+#import <VCSColorpicker/NEOColorPickerBaseViewController.h>
 #import <VCSColorpicker/NEOColorPickerFavoritesViewController.h>
-#import <VCSColorpicker/NEOColorPickerFavoritesManager.h>
 #import <VCSColorpicker/NEOColorPickerGradientView.h>
 #import <VCSColorpicker/NEOColorPickerHSLViewController.h>
 #import <VCSColorpicker/NEOColorPickerHueGridViewController.h>
