@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B1B9FAC219474AB006C0454 /* VCSColorpicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 4B1B9FAA219474AB006C0454 /* VCSColorpicker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4BD50DE221946D9C00C39F4E /* colorPicker.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9EBDE26A168E01550081C060 /* colorPicker.bundle */; };
 		4BD50DE321946D9E00C39F4E /* NEOColorPickerBaseViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EBDE25A168E01550081C060 /* NEOColorPickerBaseViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4BD50DE421946DA800C39F4E /* NEOColorPickerBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBDE25B168E01550081C060 /* NEOColorPickerBaseViewController.m */; };
@@ -27,7 +28,6 @@
 		4BD50E0021946E4D00C39F4E /* NEOColorPickerViewController.xib in Sources */ = {isa = PBXBuildFile; fileRef = 9EBDE269168E01550081C060 /* NEOColorPickerViewController.xib */; };
 		4BD50E0121946E4D00C39F4E /* UIColor+NEOColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EBDE279168E02970081C060 /* UIColor+NEOColor.m */; };
 		4BD50E0221946E6400C39F4E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EBDE210168DFCAF0081C060 /* Foundation.framework */; };
-		4BD50E092194704A00C39F4E /* VCSColorpicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 4BD50E072194704A00C39F4E /* VCSColorpicker.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9EBDE20F168DFCAF0081C060 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EBDE20E168DFCAF0081C060 /* UIKit.framework */; };
 		9EBDE211168DFCAF0081C060 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EBDE210168DFCAF0081C060 /* Foundation.framework */; };
 		9EBDE213168DFCAF0081C060 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EBDE212168DFCAF0081C060 /* CoreGraphics.framework */; };
@@ -55,9 +55,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4B1B9FA9219474AB006C0454 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B1B9FAA219474AB006C0454 /* VCSColorpicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VCSColorpicker.h; sourceTree = "<group>"; };
 		4BD50DDA21946CA900C39F4E /* VCSColorpicker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VCSColorpicker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4BD50E062194704A00C39F4E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4BD50E072194704A00C39F4E /* VCSColorpicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VCSColorpicker.h; sourceTree = "<group>"; };
 		9EBDE20A168DFCAF0081C060 /* ColorPickerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ColorPickerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EBDE20E168DFCAF0081C060 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9EBDE210168DFCAF0081C060 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -119,11 +119,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4BD50E052194704A00C39F4E /* VCSColorpicker */ = {
+		4B1B9FA8219474AB006C0454 /* VCSColorpicker */ = {
 			isa = PBXGroup;
 			children = (
-				4BD50E062194704A00C39F4E /* Info.plist */,
-				4BD50E072194704A00C39F4E /* VCSColorpicker.h */,
+				4B1B9FA9219474AB006C0454 /* Info.plist */,
+				4B1B9FAA219474AB006C0454 /* VCSColorpicker.h */,
 			);
 			name = VCSColorpicker;
 			path = ../VCSColorpicker;
@@ -136,7 +136,7 @@
 				9EBDE20D168DFCAF0081C060 /* Frameworks */,
 				9EBDE20B168DFCAF0081C060 /* Products */,
 				9EBDE259168E01550081C060 /* Source */,
-				4BD50E052194704A00C39F4E /* VCSColorpicker */,
+				4B1B9FA8219474AB006C0454 /* VCSColorpicker */,
 			);
 			sourceTree = "<group>";
 		};
@@ -221,7 +221,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BD50E092194704A00C39F4E /* VCSColorpicker.h in Headers */,
+				4B1B9FAC219474AB006C0454 /* VCSColorpicker.h in Headers */,
 				4BD50DE521946DAA00C39F4E /* NEOColorPickerFavoritesViewController.h in Headers */,
 				4BD50DE321946D9E00C39F4E /* NEOColorPickerBaseViewController.h in Headers */,
 				4BD50DEA21946DBF00C39F4E /* NEOColorPickerGradientView.h in Headers */,
