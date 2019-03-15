@@ -57,6 +57,7 @@
 /* Begin PBXFileReference section */
 		4B1B9FA9219474AB006C0454 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B1B9FAA219474AB006C0454 /* VCSColorpicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VCSColorpicker.h; sourceTree = "<group>"; };
+		4B4BB1D9223BB07B00018187 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; name = .gitignore; path = ../../.gitignore; sourceTree = "<group>"; };
 		4BD50DDA21946CA900C39F4E /* VCSColorpicker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = VCSColorpicker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EBDE20A168DFCAF0081C060 /* ColorPickerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ColorPickerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9EBDE20E168DFCAF0081C060 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -132,6 +133,7 @@
 		9EBDE1FF168DFCAF0081C060 = {
 			isa = PBXGroup;
 			children = (
+				4B4BB1D9223BB07B00018187 /* .gitignore */,
 				9EBDE214168DFCAF0081C060 /* ColorPickerExample */,
 				9EBDE20D168DFCAF0081C060 /* Frameworks */,
 				9EBDE20B168DFCAF0081C060 /* Products */,
