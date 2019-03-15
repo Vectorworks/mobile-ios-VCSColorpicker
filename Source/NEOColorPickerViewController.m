@@ -112,6 +112,8 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self updateSelectedColor];
+    
+    @throw NSInternalInconsistencyException;
 }
 
 
