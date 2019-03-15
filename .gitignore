@@ -2,7 +2,7 @@
 
 *.xcuserstate
 
-*.xcscheme
+#*.xcscheme
 
 # Xcode
 #
